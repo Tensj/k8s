@@ -1,0 +1,263 @@
+#pv
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.pv.name }} #pv-local-ten
+  labels:
+    name: {{ .Values.pv.labels.name }} #storage
+spec:
+  capacity:
+    storage: {{ .Values.pv.spec.storage }} #1Gi
+  accessModes:
+  - {{ .Values.pv.accessModes }} #ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: {{ .Values.pv.storageClassName }} #local-storage
+  local:
+    path: {{ .Values.pv.local.path }} #/root/storage
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - {{ .Values.pv.node }} #aks-agentpool-69194872-vmss000000
+
+
+---
+#pvc be
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.pvc.name }} #pvc-local-ten
+  namespace: {{ .Values.bens }} #ten-be
+spec:
+  storageClassName: {{ .Values.pvc.storageClassName }} #ocal-storage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.pvc.storage }} #1Gi
+
+
+---
+#deploy be
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.Deployment.be.name }} #backend
+  namespace: {{ .Values.bens }} #ten-be 
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.Deployment.be.labels.app }} #hello
+      tier: {{ .Values.Deployment.be.labels.tier }} #backend
+      track: {{ .Values.Deployment.be.labels.track }} #stable
+  replicas: {{ .Values.Deployment.be.replicas }} #2
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.Deployment.be.labels.app }} #hello
+        tier: {{ .Values.Deployment.be.labels.tier }} #backend
+        track: {{ .Values.Deployment.be.labels.track }} #stable
+    spec:
+      containers:
+        - name: {{ .Values.Deployment.be.containers.name }} #hello
+          image: {{ .Values.Deployment.be.containers.image }} #tensjx/ten:be1.0.1
+          resources:
+            limits:
+              memory: {{ .Values.Deployment.limits.memory }} #"500Mi"
+              cpu: {{ .Values.Deployment.limits.cpu }} #"300m"
+            requests:
+              memory: {{ .Values.Deployment.requests.memory }} #"200Mi"
+              cpu: {{ .Values.Deployment.requests.cpu }} #"200m"          
+          ports:
+            - name: {{ .Values.Deployment.be.ports.name }} #http
+              containerPort: {{ .Values.Deployment.be.ports.containerPort }} #3000
+          readinessProbe:
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+---
+#secret fe
+apiVersion: v1
+data:
+  persona: Z29vZGd1eQ==
+  username: VGVu
+kind: Secret
+metadata:
+  name: {{ .Values.secret.name }} #hello-secret
+  namespace: {{ .Values.fens }} #ten-fe
+
+---
+#configmap fe
+apiVersion: v1
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <title>Welcome!</title>
+    <style>
+    html { color-scheme: light dark; }
+    body { width: 35em; margin: 0 auto;
+    font-family: Tahoma, Verdana, Arial, sans-serif; }
+    </style>
+    </head>
+    <body>
+    <h1>Welcome to my world!</h1>
+    <p>If you see this page, I'm Piyapanl nice to meet you.</p>
+
+    <p><em>Thank you for visit me LOL.</em></p>
+    </body>
+    </html>
+kind: ConfigMap
+metadata:
+  name: {{ .Values.configmap.name }} #hello-cm
+  namespace: {{ .Values.fens }} #ten-fe
+
+---
+#deployment fe
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.Deployment.fe.name }} #frontend
+  namespace: {{ .Values.fens }} #ten-fe
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.Deployment.fe.labels.app }} #hello
+      tier: {{ .Values.Deployment.fe.labels.tier }} #frontend
+      track: {{ .Values.Deployment.fe.labels.track }} #stable
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.Deployment.fe.labels.app }} #hello
+        tier: {{ .Values.Deployment.fe.labels.tier }} #frontend
+        track: {{ .Values.Deployment.fe.labels.track }} #stable
+    spec:
+      containers:
+        - name: {{ .Values.Deployment.fe.containers.name }} #nginx
+          image: {{ .Values.Deployment.fe.containers.image }} #tensjx/ten:fe1.0.1
+          env:
+          - name: SECRET-USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: hello-secret
+                key: username
+          - name: SECRET-PERSONA
+            valueFrom:
+              secretKeyRef:
+                name: hello-secret
+                key: persona
+          resources:
+            limits:
+              memory: {{ .Values.Deployment.limits.memory }} #"500Mi"
+              cpu: {{ .Values.Deployment.limits.cpu }} #"300m"
+            requests:
+              memory: {{ .Values.Deployment.requests.memory }} #"200Mi"
+              cpu: {{ .Values.Deployment.requests.cpu }} #"200m"
+          volumeMounts:
+          - name: {{ .Values.Deployment.fe.volumeMounts.name }} #hello-v
+            mountPath: {{ .Values.Deployment.fe.volumeMounts.mountPath }} #/usr/share/nginx/html
+      volumes:
+      - name: {{ .Values.Deployment.fe.volumes.name }} #hello-v
+        configMap:
+          name: {{ .Values.Deployment.fe.configMap.name }} #hello-cm
+
+
+---
+#service be
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.Service.be.name }} #hello
+  namespace: {{ .Values.bens }} #ten-be
+spec:
+  selector:
+    app: {{ .Values.Service.be.selector.app }} #hello
+    tier: {{ .Values.Service.be.selector.tier }} #backend
+  ports:
+  - protocol: {{ .Values.Service.be.ports.protocol }} #TCP
+    port: {{ .Values.Service.be.ports.port }} #80
+    targetPort: {{ .Values.Service.be.ports.targetPort }} #3000
+
+---
+#service fe
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.Service.fe.name }} #frontend
+  namespace: {{ .Values.fens }} #ten-fe
+spec:
+  selector:
+    app: {{ .Values.Service.fe.selector.app }} #hello
+    tier: {{ .Values.Service.fe.selector.tier }} #frontend
+  ports:
+  - protocol: {{ .Values.Service.fe.ports.protocol }} #"TCP"
+    port: {{ .Values.Service.fe.ports.port }} #80
+    targetPort: {{ .Values.Service.fe.ports.targetPort }} #80
+  type: LoadBalancer
+
+---
+#hpa be
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: {{ .Values.hpa.be.labels.app }} #hpa
+    developer: {{ .Values.hpa.be.labels.developer }} #ten
+  name: {{ .Values.hpa.be.name }} #hpa-backend
+  namespace: {{ .Values.bens }} #ten-be
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Values.hpa.be.spec.name }} #backend
+  minReplicas: {{ .Values.hpa.be.spec.minReplicas }} #2
+  maxReplicas: {{ .Values.hpa.be.spec.maxReplicas }} #3
+  targetCPUUtilizationPercentage: {{ .Values.hpa.be.spec.targetCPUUtilizationPercentage }} #75
+
+---
+#hpa fe
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: {{ .Values.hpa.fe.labels.app }} #hpa
+    developer: {{ .Values.hpa.fe.labels.developer }} #ten
+  name: {{ .Values.hpa.fe.name }} #hpa-frontend
+  namespace: {{ .Values.fens }} #ten-fe
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Values.hpa.fe.spec.name }} #frontend
+  minReplicas: {{ .Values.hpa.fe.spec.minReplicas }} #1
+  maxReplicas: {{ .Values.hpa.fe.spec.maxReplicas }} #2
+  targetCPUUtilizationPercentage: {{ .Values.hpa.fe.spec.targetCPUUtilizationPercentage }} #75
+
+---
+#ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hello-ing
+  namespace: ten-fe
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+  - host: "ten.hello.com"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/hello"
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80

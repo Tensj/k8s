@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.Deployment.name }} #backend
+  namespace: {{ .Release.namespace }} #ten-be 
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.Deployment.labels.app }} #hello
+      tier: {{ .Values.Deployment.labels.tier }} #backend
+      track: {{ .Values.Deployment.labels.track }} #stable
+  replicas: {{ .Values.Deployment.replicas }} #2
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.Deployment.labels.app }} #hello
+        tier: {{ .Values.Deployment.labels.tier }} #backend
+        track: {{ .Values.Deployment.labels.track }} #stable
+    spec:
+      containers:
+        - name: {{ .Values.Deployment.containers.name }} #hello
+          image: {{ .Values.Deployment.containers.image }} #tensjx/ten:be1.0.1
+          resources:
+            limits:
+              memory: {{ .Values.Deployment.limits.memory }} #"500Mi"
+              cpu: {{ .Values.Deployment.limits.cpu }} #"300m"
+            requests:
+              memory: {{ .Values.Deployment.requests.memory }} #"200Mi"
+              cpu: {{ .Values.Deployment.requests.cpu }} #"200m"          
+          ports:
+            - name: {{ .Values.Deployment.ports.name }} #http
+              containerPort: {{ .Values.Deployment.ports.containerPort }} #3000
+          readinessProbe:
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10

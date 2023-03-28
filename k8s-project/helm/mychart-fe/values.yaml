@@ -1,0 +1,61 @@
+
+secret:
+  name: hello-secret
+
+configmap:
+  name: hello-cm
+
+Deployment:
+  name: frontend
+  replicas: 1
+  labels:
+    app: hello
+    tier: frontend
+    track: stable
+  containers:
+    name: nginx
+    image: tensjx/ten:fe1.0.1
+  volumeMounts:
+    name: hello-v
+    mountPath: /usr/share/nginx/html
+  volumes:
+    name: hello-v
+  configMap:
+    name: hello-cm
+  limits:
+    memory: "512Mi"
+    cpu: "300m"
+  requests:
+    memory: "256Mi"
+    cpu: "200m"
+
+Service:
+  name: frontend
+  selector:
+    app: hello
+    tier: frontend
+  ports:
+    protocol: "TCP"
+    port: 80
+    targetPort: 80
+
+hpa:
+  labels:
+    app: hpa
+    developer: ten
+  name: hpa-frontend
+  spec:
+    name: frontend
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 75
+
+Ing:
+  name: hello-ing
+  annotations: nginx
+  host: "ten.hello.com"
+  pathType: Prefix
+  path: "/hello"
+  service:
+    name: frontend
+    portnumber: 80

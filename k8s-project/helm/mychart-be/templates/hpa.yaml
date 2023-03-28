@@ -1,0 +1,16 @@
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: {{ .Values.hpa.labels.app }} #hpa
+    developer: {{ .Values.hpa.labels.developer }} #ten
+  name: {{ .Values.hpa.name }} #hpa-backend
+  namespace: {{ .Release.namespace }} #ten-be
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Values.hpa.spec.name }} #backend
+  minReplicas: {{ .Values.hpa.spec.minReplicas }} #2
+  maxReplicas: {{ .Values.hpa.spec.maxReplicas }} #3
+  targetCPUUtilizationPercentage: {{ .Values.hpa.spec.targetCPUUtilizationPercentage }} #75

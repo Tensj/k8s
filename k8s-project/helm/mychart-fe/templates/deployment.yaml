@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.Deployment.name }} #frontend
+  namespace: {{ .Release.namespace }} #ten-fe
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.Deployment.labels.app }} #hello
+      tier: {{ .Values.Deployment.labels.tier }} #frontend
+      track: {{ .Values.Deployment.labels.track }} #stable
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.Deployment.labels.app }} #hello
+        tier: {{ .Values.Deployment.labels.tier }} #frontend
+        track: {{ .Values.Deployment.labels.track }} #stable
+    spec:
+      containers:
+        - name: {{ .Values.Deployment.containers.name }} #nginx
+          image: {{ .Values.Deployment.containers.image }} #tensjx/ten:fe1.0.1
+          env:
+          - name: SECRET-USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: hello-secret
+                key: username
+          - name: SECRET-PERSONA
+            valueFrom:
+              secretKeyRef:
+                name: hello-secret
+                key: persona
+          resources:
+            limits:
+              memory: {{ .Values.Deployment.limits.memory }} #"500Mi"
+              cpu: {{ .Values.Deployment.limits.cpu }} #"300m"
+            requests:
+              memory: {{ .Values.Deployment.requests.memory }} #"200Mi"
+              cpu: {{ .Values.Deployment.requests.cpu }} #"200m"
+          volumeMounts:
+          - name: {{ .Values.Deployment.volumeMounts.name }} #hello-v
+            mountPath: {{ .Values.Deployment.volumeMounts.mountPath }} #/usr/share/nginx/html
+      volumes:
+      - name: {{ .Values.Deployment.volumes.name }} #hello-v
+        configMap:
+          name: {{ .Values.Deployment.configMap.name }} #hello-cm

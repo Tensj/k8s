@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: ten-be 
+spec:
+  selector:
+    matchLabels:
+      app: hello
+      tier: backend
+      track: stable
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: hello
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - name: hello
+          image: tensjx/ten:be1.0.1
+          resources:
+            limits:
+              memory: "500Mi"
+              cpu: "300m"
+            requests:
+              memory: "200Mi"
+              cpu: "200m"          
+          ports:
+            - name: http
+              containerPort: 3000

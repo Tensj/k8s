@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.Service.name }} #hello
+  namespace: {{ .Release.namespace }} #ten-be
+spec:
+  selector:
+    app: {{ .Values.Service.selector.app }} #hello
+    tier: {{ .Values.Service.selector.tier }} #backend
+  ports:
+  - protocol: {{ .Values.Service.ports.protocol }} #TCP
+    port: {{ .Values.Service.ports.port }} #80
+    targetPort: {{ .Values.Service.ports.targetPort }} #3000

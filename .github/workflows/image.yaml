@@ -11,4 +11,11 @@ jobs:
         run: git clone https://github.com/Tensj/k8s.git -b develop
       - name: docker-login
         run: docker login -u tensjx -p ${{ Secrets.DOCKER_PASS }}
+      - name: docker-build
+        run: |
+          cd k8s-project/docker
+          ls -lrt
+
+        docker build . -t tensjx/cicd:github_action_ver_01
+        docker push tensjx/cicd:github_action_ver_01
       

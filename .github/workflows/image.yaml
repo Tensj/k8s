@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: check server-info
-        run: lsb-relases -a
+        run: lsb_release -a
       - name: checkout
         run: git clone https://github.com/Tensj/k8s.git -b develop
       - name: docker-login

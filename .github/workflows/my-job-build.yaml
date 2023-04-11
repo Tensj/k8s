@@ -8,9 +8,7 @@ jobs:
       - name: check server-info
         run: lsb_release -a
       - name: git clone
-        run: git clone https://github.com/Tensj/k8s.git
-      - name: git checkout
-        run: git checkout minikube
+        run: git clone https://github.com/Tensj/k8s.git -b minikube
       - name: helm install mychart-be
         run: |
           cd k8s/k8s-project/helm

@@ -2,7 +2,7 @@ name: job-build
 run-name: ${{ github.actor }} is learning GitHub Actions build job
 on: [push]
 jobs:
-  docker-build:
+  job-build:
     runs-on: self-hosted
     steps:
       - name: check server-info

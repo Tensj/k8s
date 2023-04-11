@@ -7,10 +7,6 @@ jobs:
     steps:
       - name: check server-info
         run: lsb_release -a
-      - name: git fetch
-        run: git fetch
-      - name: git pull
-        run: git pull
       - name: git checkout
         run: git checkout minikube
       - name: helm install mychart-be

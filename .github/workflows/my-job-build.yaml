@@ -1,0 +1,23 @@
+name: docker-build
+run-name: ${{ github.actor }} is learning GitHub Actions build docker image
+on: [push]
+jobs:
+  docker-build:
+    runs-on: self-hosted
+    steps:
+      - name: check server-info
+        run: lsb_release -a
+      - name: checkout
+        run: git clone https://github.com/Tensj/k8s.git -b minikube
+      - name: helm install mychart-be
+        run: |
+          cd k8s/k8s-project/helm
+          ls -lrt
+
+          helm upgrade --install mychart-be -f k8s/k8s-project/helm/mychart-be/values.yaml mychart-be -n ten-be
+      - name: helm install mychart-fe
+        run: |
+          cd k8s/k8s-project/helm
+          ls -lrt
+
+          helm upgrade --install mychart-fe -f k8s/k8s-project/helm/mychart-be/values.yaml mychart-fe -n ten-fe

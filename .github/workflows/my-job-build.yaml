@@ -14,10 +14,10 @@ jobs:
           cd k8s/k8s-project/helm
           ls -lrt
 
-          helm upgrade --install mychart-be -f k8s/k8s-project/helm/mychart-be/values.yaml mychart-be -n ten-be
+          helm upgrade --install mychart-be -f mychart-be/values.yaml mychart-be -n ten-be
       - name: helm install mychart-fe
         run: |
           cd k8s/k8s-project/helm
           ls -lrt
 
-          helm upgrade --install mychart-fe -f k8s/k8s-project/helm/mychart-be/values.yaml mychart-fe -n ten-fe
+          helm upgrade --install mychart-fe -f mychart-fe/values.yaml mychart-fe -n ten-fe

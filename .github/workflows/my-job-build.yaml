@@ -1,6 +1,15 @@
 name: job-build
 run-name: ${{ github.actor }} is learning GitHub Actions build job
-on: [push]
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'input your software version'
+        required: true
+        default: '1.0.0'
+        type: string
+  push: 
+    branches: [main]
 jobs:
   job-build:
     runs-on: self-hosted
@@ -8,7 +17,7 @@ jobs:
       - name: check server-info
         run: lsb_release -a
       - name: git clone
-        run: git clone https://github.com/Tensj/k8s.git -b minikube
+        run: git clone https://github.com/Tensj/k8s.git
 
       - name: docker-login
         run: docker login -u tensjx -p ${{ Secrets.DOCKER_PASS }}
@@ -40,3 +49,7 @@ jobs:
           ls -lrt
 
           helm upgrade --install mychart-fe -f mychart-fe/values.yaml mychart-fe -n ten-fe --set image=tensjx/cicd_fe:${{ github.run_number }} --atomic --wait
+
+      - name: Set Tag on Workflow Dispatch
+        if: github.event_name == 'workflow_dispatch'
+        run: echo "${{ github.event.inputs.tag }}"

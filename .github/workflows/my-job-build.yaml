@@ -1,5 +1,5 @@
-name: docker-build
-run-name: ${{ github.actor }} is learning GitHub Actions build docker image
+name: job-build
+run-name: ${{ github.actor }} is learning GitHub Actions build job
 on: [push]
 jobs:
   docker-build:
@@ -7,7 +7,7 @@ jobs:
     steps:
       - name: check server-info
         run: lsb_release -a
-      - name: checkout
+      - name: clone git
         run: git clone https://github.com/Tensj/k8s.git -b minikube
       - name: helm install mychart-be
         run: |

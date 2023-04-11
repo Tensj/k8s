@@ -9,15 +9,16 @@ jobs:
         run: lsb_release -a
       - name: git clone
         run: git clone https://github.com/Tensj/k8s.git -b minikube
+
       - name: helm install mychart-be
         run: |
           cd k8s/k8s-project/helm
           ls -lrt
 
-          helm upgrade --install mychart-be -f mychart-be/values.yaml mychart-be -n ten-be
+          helm upgrade --install mychart-be -f mychart-be/values.yaml mychart-be -n ten-be --atomic --wait
       - name: helm install mychart-fe
         run: |
           cd k8s/k8s-project/helm
           ls -lrt
 
-          helm upgrade --install mychart-fe -f mychart-fe/values.yaml mychart-fe -n ten-fe
+          helm upgrade --install mychart-fe -f mychart-fe/values.yaml mychart-fe -n ten-fe --atomic --wait

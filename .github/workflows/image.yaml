@@ -3,7 +3,7 @@ run-name: ${{ github.actor }} is learning GitHub Actions build docker image
 on: [push]
 jobs:
   docker-build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: check server-info
         run: lsb_release -a

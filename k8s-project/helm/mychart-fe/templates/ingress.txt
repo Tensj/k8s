@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.Ing.name }} #hello-ing
+  namespace: {{ .Release.namespace }} #ten-fe
+  annotations:
+    kubernetes.io/ingress.class: {{ .Values.Ing.annotations }} #nginx
+spec:
+  rules:
+  - host: {{ .Values.Ing.host }} #"ten.hello.com"
+    http:
+      paths:
+      - pathType: {{ .Values.Ing.pathType }} #Prefix
+        path: {{ .Values.Ing.path }} #"/hello"
+        backend:
+          service:
+            name: {{ .Values.Ing.service.name }} #frontend
+            port:
+              number: {{ .Values.Ing.service.portnumber }} #80

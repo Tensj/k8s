@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.Service.name }} #frontend
+  namespace: {{ .Release.namespace }} #ten-fe
+spec:
+  selector:
+    app: {{ .Values.Service.selector.app }} #hello
+    tier: {{ .Values.Service.selector.tier }} #frontend
+  ports:
+  - protocol: {{ .Values.Service.ports.protocol }} #"TCP"
+    port: {{ .Values.Service.ports.port }} #80
+    targetPort: {{ .Values.Service.ports.targetPort }} #80
+  type: LoadBalancer

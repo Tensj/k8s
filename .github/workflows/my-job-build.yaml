@@ -1,0 +1,42 @@
+name: job-build
+run-name: ${{ github.actor }} is learning GitHub Actions build job
+on: [push]
+jobs:
+  job-build:
+    runs-on: self-hosted
+    steps:
+      - name: check server-info
+        run: lsb_release -a
+      - name: git clone
+        run: git clone https://github.com/Tensj/k8s.git -b minikube
+
+      - name: docker-login
+        run: docker login -u tensjx -p ${{ Secrets.DOCKER_PASS }}
+
+      - name: docker-build-be
+        run: |
+          cd k8s/k8s-project/docker
+          ls -lrt
+          docker build . -t tensjx/cicd_be:${{ github.run_number }}
+          docker push tensjx/cicd_be:${{ github.run_number }}
+
+      - name: helm install mychart-be
+        run: |
+          cd k8s/k8s-project/helm
+          ls -lrt
+
+          helm upgrade --install mychart-be -f mychart-be/values.yaml mychart-be -n ten-be --set image=tensjx/cicd_be:${{ github.run_number }} --atomic --wait
+      
+      - name: docker-build-fe
+        run: |
+          cd k8s/k8s-project/myserver
+          ls -lrt
+          docker build . -t tensjx/cicd_fe:${{ github.run_number }}
+          docker push tensjx/cicd_fe:${{ github.run_number }}      
+
+      - name: helm install mychart-fe
+        run: |
+          cd k8s/k8s-project/helm
+          ls -lrt
+
+          helm upgrade --install mychart-fe -f mychart-fe/values.yaml mychart-fe -n ten-fe --set image=tensjx/cicd_fe:${{ github.run_number }} --atomic --wait

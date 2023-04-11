@@ -1,0 +1,61 @@
+pv:
+  name: pv-local-ten
+  labels:
+    name: storage
+  spec:
+    storage: 1Gi
+  accessModes: ReadWriteOnce
+  storageClassName: local-storage
+  local:
+    path: /root/storage
+  node: aks-agentpool-69194872-vmss000000
+
+pvc:
+  name: pvc-local-ten
+  storageClassName: local-storage
+  storage: 1Gi
+
+
+Deployment:
+  name: backend
+  replicas: 2
+  labels:
+    app: hello
+    tier: backend
+    track: stable
+  containers:
+    name: hello
+    image: tensjx/ten:be1.0.1
+  ports:
+    name: http
+    containerPort: 3000
+  limits:
+    memory: "512Mi"
+    cpu: "300m"
+  requests:
+    memory: "256Mi"
+    cpu: "200m"
+
+Service:
+  name: hello
+  selector:
+    app: hello
+    tier: backend
+  ports:
+    protocol: TCP
+    port: 80
+    targetPort: 3000
+
+hpa:
+  labels:
+    app: hpa
+    developer: ten
+  name: hpa-backend
+  spec:
+    name: backend
+    minReplicas: 2
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 75
+  
+
+

@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hello-ingress
+  namespace: ten-be
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+  - host: "ten.hello.com"
+    http:
+      paths:
+      - pathType: Prefix
+        backend:
+          service:
+            name: hello
+            port:
+              number: 80
+        path: /hello
+

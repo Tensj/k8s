@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.pvc.name }} #pvc-local-ten
+  namespace: {{ .Release.namespace }} #ten-be
+spec:
+  storageClassName: {{ .Values.pvc.storageClassName }} #ocal-storage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.pvc.storage }} #1Gi

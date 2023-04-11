@@ -9,7 +9,7 @@ on:
         default: '1.0.0'
         type: string
   push: 
-    branches: [main-1]
+    branches: [main]
 jobs:
   job-build:
     runs-on: self-hosted
@@ -19,6 +19,10 @@ jobs:
       - name: git clone
         run: git clone https://github.com/Tensj/k8s.git
 
+  docker-build:
+    runs-on: self-hosted
+    needs: job-build
+    steps:
       - name: docker-login
         run: docker login -u tensjx -p ${{ Secrets.DOCKER_PASS }}
 
@@ -29,20 +33,24 @@ jobs:
           docker build . -t tensjx/cicd_be:${{ github.run_number }}
           docker push tensjx/cicd_be:${{ github.run_number }}
 
+      - name: docker-build-fe
+        run: |
+          cd k8s/k8s-project/myserver
+          ls -lrt
+          docker build . -t tensjx/cicd_fe:${{ github.run_number }}
+          docker push tensjx/cicd_fe:${{ github.run_number }}
+
+  helm-deploy:
+    runs-on: self-hosted
+    needs: docker-build
+    steps:
       - name: helm install mychart-be
         run: |
           cd k8s/k8s-project/helm
           ls -lrt
 
           helm upgrade --install mychart-be -f mychart-be/values.yaml mychart-be -n ten-be --set image=tensjx/cicd_be:${{ github.run_number }} --atomic --wait
-      
-      - name: docker-build-fe
-        run: |
-          cd k8s/k8s-project/myserver
-          ls -lrt
-          docker build . -t tensjx/cicd_fe:${{ github.run_number }}
-          docker push tensjx/cicd_fe:${{ github.run_number }}      
-
+            
       - name: helm install mychart-fe
         run: |
           cd k8s/k8s-project/helm
